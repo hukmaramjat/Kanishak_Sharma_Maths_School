@@ -7,9 +7,10 @@ interface BoardsProps {
   onBookDemoClick: () => void;
   boards?: Board[];
   showPricingBoards?: boolean;
+  logoUrl?: string;
 }
 
-export default function Boards({ onBookDemoClick, boards = BOARDS_DATA, showPricingBoards = true }: BoardsProps) {
+export default function Boards({ onBookDemoClick, boards = BOARDS_DATA, showPricingBoards = true, logoUrl }: BoardsProps) {
   const [expandedBoardId, setExpandedBoardId] = useState<string | null>(null);
   const [calcHours, setCalcHours] = useState<number>(4); // hours per week default
   const [calcTier, setCalcTier] = useState<string>('high'); // middle, high, senior

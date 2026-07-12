@@ -23,11 +23,8 @@ export default function Header({ onBookDemoClick, onNavigate, settings, onAdminT
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { name: 'Courses', href: 'courses' },
     { name: 'Boards', href: 'boards' },
     { name: 'Home Tuitions', href: 'home-tuition' },
-    { name: 'Practice Quiz', href: 'quiz' },
-    { name: 'Formulas', href: 'formulas' },
     { name: 'Reviews', href: 'reviews' },
     { name: 'FAQ', href: 'faq' }
   ];
@@ -51,7 +48,7 @@ export default function Header({ onBookDemoClick, onNavigate, settings, onAdminT
         >
           <img 
             alt="Kanishak Sharma Maths School Logo" 
-            className="h-11 w-auto object-contain" 
+            className="h-16 md:h-20 w-auto object-contain" 
             src={settings.logoUrl}
             referrerPolicy="no-referrer"
           />

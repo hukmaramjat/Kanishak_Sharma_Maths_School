@@ -17,27 +17,26 @@ interface HeroProps {
 }
 
 export default function Hero({ onBookDemoClick, onCallClick, onNavigateToQuiz, settings }: HeroProps) {
-  const [spotlightConcept, setSpotlightConcept] = useState<'pythagoras' | 'derivative' | 'limit'>('pythagoras');
-
   return (
     <section id="hero" className="relative pt-12 pb-20 md:pt-16 md:pb-24 overflow-hidden bg-background">
-      {/* Background Math watermark */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.06]">
-        <div 
-          className="w-full h-full bg-cover bg-center bg-no-repeat"
-          style={{ 
-            backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuANd6wfvqSSrDtfpI6izfg2FbT3RP2IKxm5HZsDry3qnmaIMisy3nLoEGrEhaCav2RRa3r093O0Ox4REhTWzs_lkZfDLk8v-M1bVO_RzE9q8GueJLe--2k3K9GDyeFaon-FNapp_kW1GfvVt8zHpes3az4cSoqDXl_-gzuJ-pv1eWB7iwqXAl33aPxiEKAtrbNQcSmkI4azbwRrB7mEuYTxoWu7o8scWMeC0jqGxGIDTbWK2VD_lsQyCRzma21G9IQwMudz4o0qs4kY')" 
-          }}
-        />
-      </div>
+
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
         {/* Main Glassmorphic Container */}
         <div 
-          className="bg-white/70 backdrop-blur-md p-8 md:p-14 rounded-4xl border border-white/20 shadow-xl max-w-4xl w-full flex flex-col items-center space-y-8"
+          className="bg-white/70 backdrop-blur-md p-8 md:p-14 rounded-4xl border border-white/20 shadow-xl max-w-4xl w-full flex flex-col items-center space-y-8 relative overflow-hidden"
           style={{ boxShadow: '20px 20px 60px #cfd0d3, -20px -20px 60px #ffffff' }}
           id="hero-container"
         >
+          {/* Background Logo watermark inside hero-container */}
+          <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.06] flex items-center justify-center">
+            <div 
+              className="w-full h-full bg-contain bg-center bg-no-repeat"
+              style={{ backgroundImage: `url('${settings.logoUrl}')` }}
+            />
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center space-y-8">
           {/* Admissions Badge */}
           <div className="inline-flex items-center gap-2.5 bg-white border border-gray-100 px-4 py-1.5 rounded-full shadow-[inset_2px_2px_6px_#cfd0d3,inset_-2px_-2px_6px_#ffffff]">
             <span className="w-2.5 h-2.5 rounded-full bg-secondary-container animate-pulse"></span>
@@ -125,101 +124,6 @@ export default function Hero({ onBookDemoClick, onCallClick, onNavigateToQuiz, s
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
-        </div>
-
-        {/* Concept Spotlight Card for dynamic interaction and proof of Concept Clarity */}
-        <div className="mt-12 max-w-3xl w-full text-left bg-white rounded-2xl p-6 border border-gray-100 shadow-sm" id="concept-spotlight">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-4 mb-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-secondary-container/10 p-2 rounded-lg text-secondary-container">
-                <GraduationCap size={20} />
-              </div>
-              <div>
-                <h4 className="font-heading font-semibold text-[16px] text-primary">Concept Clarity Spotlight</h4>
-                <p className="font-sans text-xs text-gray-500">Understanding the reasoning behind formulas, not just memorizing.</p>
-              </div>
-            </div>
-            {/* Spotlight tabs */}
-            <div className="flex bg-gray-50 p-1 rounded-lg self-start md:self-auto text-xs">
-              <button 
-                onClick={() => setSpotlightConcept('pythagoras')}
-                className={`px-3 py-1.5 rounded-md font-sans font-medium transition-all ${spotlightConcept === 'pythagoras' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                Pythagoras Theorem
-              </button>
-              <button 
-                onClick={() => setSpotlightConcept('derivative')}
-                className={`px-3 py-1.5 rounded-md font-sans font-medium transition-all ${spotlightConcept === 'derivative' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                Visual Derivatives
-              </button>
-              <button 
-                onClick={() => setSpotlightConcept('limit')}
-                className={`px-3 py-1.5 rounded-md font-sans font-medium transition-all ${spotlightConcept === 'limit' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                Intuiting Limits
-              </button>
-            </div>
-          </div>
-
-          {/* Dynamic Concept presentation */}
-          <div className="min-h-28 flex items-center">
-            {spotlightConcept === 'pythagoras' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full animate-fade-in">
-                <div className="md:col-span-2 space-y-2">
-                  <p className="font-sans text-sm text-gray-700 leading-relaxed">
-                    Instead of just $a^2 + b^2 = c^2$, think of it as actual physical squares built on the sides of a right triangle. The total area of the two smaller squares matches the area of the largest square exactly.
-                  </p>
-                  <div className="inline-flex gap-4 text-xs font-mono text-gray-500">
-                    <span>• Area A = $3^2 = 9$</span>
-                    <span>• Area B = $4^2 = 16$</span>
-                    <span>• Area C = $5^2 = 25$ ($9+16$)</span>
-                  </div>
-                </div>
-                <div className="bg-primary/5 p-4 rounded-xl flex flex-col justify-center items-center text-center border border-primary/10">
-                  <span className="font-mono text-xs text-gray-500 mb-1">Visual Formula</span>
-                  <span className="font-sans text-[18px] font-bold text-primary italic">a² + b² = c²</span>
-                </div>
-              </div>
-            )}
-
-            {spotlightConcept === 'derivative' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full animate-fade-in">
-                <div className="md:col-span-2 space-y-2">
-                  <p className="font-sans text-sm text-gray-700 leading-relaxed">
-                    A derivative is simply the <strong>instantaneous rate of change</strong>. If you zoom in infinitely close to any curve (like a circle or parabola), it looks like a straight tangent line. The slope of that line is your derivative!
-                  </p>
-                  <div className="inline-flex gap-4 text-xs font-mono text-gray-500">
-                    <span>• f(x) = x²</span>
-                    <span>• f'(x) = 2x</span>
-                    <span>• Slope at x=3 is 6</span>
-                  </div>
-                </div>
-                <div className="bg-primary/5 p-4 rounded-xl flex flex-col justify-center items-center text-center border border-primary/10">
-                  <span className="font-mono text-xs text-gray-500 mb-1">Visual Formula</span>
-                  <span className="font-sans text-[18px] font-bold text-primary italic">f'(x) = lim (h→0) [f(x+h) - f(x)] / h</span>
-                </div>
-              </div>
-            )}
-
-            {spotlightConcept === 'limit' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full animate-fade-in">
-                <div className="md:col-span-2 space-y-2">
-                  <p className="font-sans text-sm text-gray-700 leading-relaxed">
-                    A limit asks: "What value does my function get closer and closer to, as the input approaches a target?" Even if the function has a hole right at that point, the limit tells us what value *should* be there.
-                  </p>
-                  <div className="inline-flex gap-4 text-xs font-mono text-gray-500">
-                    <span>• Example: (sin x) / x at x=0</span>
-                    <span>• Plugging 0 gives 0/0 (undefined)</span>
-                    <span>• But approaches exactly 1</span>
-                  </div>
-                </div>
-                <div className="bg-primary/5 p-4 rounded-xl flex flex-col justify-center items-center text-center border border-primary/10">
-                  <span className="font-mono text-xs text-gray-500 mb-1">Visual Formula</span>
-                  <span className="font-sans text-[18px] font-bold text-primary italic">lim (x→0) [sin(x) / x] = 1</span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

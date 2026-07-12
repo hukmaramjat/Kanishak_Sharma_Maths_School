@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Boards from './components/Boards';
+import ConceptSpotlight from './components/ConceptSpotlight';
 import HomeTuition from './components/HomeTuition';
 import DemoBookingModal from './components/DemoBookingModal';
 import MathQuiz from './components/MathQuiz';
@@ -28,7 +29,7 @@ export default function App() {
   
   // General Site Settings State
   const [settings, setSettings] = useState({
-    logoUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuAqX5hWXMq8IyVm3vhmeT-FlxSH3VvpH6GCT7hobcQAZJ08wloDURU79-8TVB29lS1lBKJw3viyvt2Tmh2_OqThq5y7gKTGXG2pyEmbcoiR9xVqHKd24Xr8MjvaiOyIGfZO1NoPWVI2ew_zrJ8PZv-4jg9n4R-B3G40BQjkDia4nmdOO7roEIzVuhJ6FluwqxAi9kdjwr6aljSDksWvTXu-kpJBUfaFdmz4kIKIhw1Nz64IWvNnXN2qLfA5POb51Zz6tGdCKqdIJDUf",
+    logoUrl: "/logo.png",
     phoneNumber: "+91 9166931387",
     admissionsText: "Admissions Open 2024-25",
     enrolledStudentsCount: "10,000+",
@@ -453,7 +454,10 @@ export default function App() {
             )}
 
             {/* 3. Boards & Pricing Section */}
-            <Boards onBookDemoClick={() => setIsBookingOpen(true)} boards={boards} showPricingBoards={settings.showPricingBoards} />
+            <Boards onBookDemoClick={() => setIsBookingOpen(true)} boards={boards} showPricingBoards={settings.showPricingBoards} logoUrl={settings.logoUrl} />
+
+            {/* Concept Clarity Spotlight (Moved below Boards) */}
+            <ConceptSpotlight />
 
             {/* 3.5. Home Tuition Section */}
             <HomeTuition onBookDemoClick={() => setIsBookingOpen(true)} />
