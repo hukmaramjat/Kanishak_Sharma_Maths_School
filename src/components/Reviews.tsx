@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { INITIAL_REVIEWS } from '../data';
 import { Review } from '../types';
 import { Star, ShieldCheck, UserPlus, Filter, CheckCircle2, MessageSquarePlus } from 'lucide-react';
+import { db } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 interface ReviewsProps {
   reviews?: Review[];
@@ -24,9 +26,7 @@ export default function Reviews({ reviews: propsReviews }: ReviewsProps) {
     if (propsReviews) {
       setReviews(propsReviews);
     } else {
-      // Load existing local reviews plus static reviews
-      const local = JSON.parse(localStorage.getItem('math_reviews') || '[]');
-      setReviews([...local, ...INITIAL_REVIEWS]);
+      setReviews(INITIAL_REVIEWS);
     }
   }, [propsReviews]);
 
@@ -34,7 +34,7 @@ export default function Reviews({ reviews: propsReviews }: ReviewsProps) {
     setSelectedFilter(filter);
   };
 
-  const handleReviewSubmit = (e: React.FormEvent) => {
+  const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !gradeClass.trim() || !reviewText.trim()) {
       alert('Please fill out all required fields.');
@@ -56,9 +56,13 @@ export default function Reviews({ reviews: propsReviews }: ReviewsProps) {
     const updated = [newReview, ...reviews];
     setReviews(updated);
 
-    // Save user-submitted reviews to localStorage
-    const local = JSON.parse(localStorage.getItem('math_reviews') || '[]');
-    localStorage.setItem('math_reviews', JSON.stringify([newReview, ...local]));
+    // Save user-submitted reviews to Firestore
+    try {
+      const reviewsRef = collection(db, 'reviews');
+      await addDoc(reviewsRef, newReview);
+    } catch (err) {
+      console.error('Error adding review', err);
+    }
 
     // Reset Form
     setName('');

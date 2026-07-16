@@ -18,6 +18,8 @@ import StudentCabinet from './components/StudentCabinet';
 import { Phone, MessageCircle, X, Send, CheckCircle2, Calendar, HelpCircle, ArrowRight } from 'lucide-react';
 import { Booking, Board, Review } from './types';
 import { BOARDS_DATA, INITIAL_REVIEWS } from './data';
+import { db } from './firebase';
+import { doc, onSnapshot, setDoc, collection, addDoc, query, orderBy } from 'firebase/firestore';
 
 export default function App() {
   const [isAdminMode, setIsAdminMode] = useState(false);
@@ -65,67 +67,86 @@ export default function App() {
   const [callbackSuccess, setCallbackSuccess] = useState(false);
 
   useEffect(() => {
-    // Load general settings
-    const storedSettings = localStorage.getItem('math_general_settings');
-    if (storedSettings) {
-      try {
-        setSettings(JSON.parse(storedSettings));
-      } catch (e) {
-        console.error('Error parsing settings', e);
+    // 1. Listen to Website Settings & Boards
+    const settingsRef = doc(db, 'settings', 'website');
+    const unsubSettings = onSnapshot(settingsRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.generalSettings) setSettings(data.generalSettings);
+        if (data.boards) setBoards(data.boards);
+      } else {
+        // Initialize defaults if document doesn't exist
+        setDoc(settingsRef, {
+          generalSettings: settings,
+          boards: BOARDS_DATA
+        }, { merge: true });
       }
-    }
+    });
 
-    // Load boards
-    const storedBoards = localStorage.getItem('math_boards');
-    if (storedBoards) {
-      try {
-        setBoards(JSON.parse(storedBoards));
-      } catch (e) {
-        console.error('Error parsing boards', e);
+    // 2. Listen to Reviews
+    const reviewsRef = collection(db, 'reviews');
+    // For simplicity we just listen to all reviews. In a real app you might want to order by date.
+    const unsubReviews = onSnapshot(reviewsRef, (snapshot) => {
+      if (!snapshot.empty) {
+        const loadedReviews = snapshot.docs.map(doc => doc.data() as Review);
+        setReviews(loadedReviews);
+      } else {
+        // Initialize with default reviews if empty
+        INITIAL_REVIEWS.forEach(review => addDoc(reviewsRef, review));
+        setReviews(INITIAL_REVIEWS);
       }
-    }
+    });
 
-    // Load reviews
-    const storedReviews = localStorage.getItem('math_reviews');
-    if (storedReviews) {
-      try {
-        setReviews(JSON.parse(storedReviews));
-      } catch (e) {
-        console.error('Error parsing reviews', e);
-      }
-    } else {
-      // Initialize with default reviews in storage so Admin can see/delete them
-      localStorage.setItem('math_reviews', JSON.stringify(INITIAL_REVIEWS));
-      setReviews(INITIAL_REVIEWS);
-    }
+    // 3. Listen to Bookings
+    const bookingsRef = collection(db, 'bookings');
+    const unsubBookings = onSnapshot(bookingsRef, (snapshot) => {
+      const loadedBookings = snapshot.docs.map(doc => doc.data() as Booking);
+      setActiveBookings(loadedBookings);
+    });
 
-    // Load local bookings
-    const bookings = JSON.parse(localStorage.getItem('math_bookings') || '[]');
-    setActiveBookings(bookings);
+    // 4. Listen to Callbacks
+    const callbacksRef = collection(db, 'callbacks');
+    const unsubCallbacks = onSnapshot(callbacksRef, (snapshot) => {
+      const loadedCallbacks = snapshot.docs.map(doc => doc.data());
+      setCallbacks(loadedCallbacks);
+    });
 
-    // Load local callbacks
-    const loadedCallbacks = JSON.parse(localStorage.getItem('math_callbacks') || '[]');
-    setCallbacks(loadedCallbacks);
+    return () => {
+      unsubSettings();
+      unsubReviews();
+      unsubBookings();
+      unsubCallbacks();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleUpdateSettings = (newSettings: typeof settings) => {
+  const handleUpdateSettings = async (newSettings: typeof settings) => {
     setSettings(newSettings);
-    localStorage.setItem('math_general_settings', JSON.stringify(newSettings));
+    const settingsRef = doc(db, 'settings', 'website');
+    await setDoc(settingsRef, { generalSettings: newSettings }, { merge: true });
   };
 
-  const handleUpdateBoards = (newBoards: Board[]) => {
+  const handleUpdateBoards = async (newBoards: Board[]) => {
     setBoards(newBoards);
-    localStorage.setItem('math_boards', JSON.stringify(newBoards));
+    const settingsRef = doc(db, 'settings', 'website');
+    await setDoc(settingsRef, { boards: newBoards }, { merge: true });
   };
 
-  const handleUpdateReviews = (newReviews: Review[]) => {
+  const handleUpdateReviews = async (newReviews: Review[]) => {
+    // Admin panel review updates might be complex if it overwrites the whole array.
+    // For now, if Admin sends a full array to overwrite, we can just batch or rewrite them.
+    // However, to keep it simple and match the old localStorage behavior, we can store reviews 
+    // inside the 'settings/website' doc, OR we can just write the whole array to a single doc.
+    // Let's store the entire reviews array in a single doc 'settings/reviews' to support wholesale replacement from Admin.
     setReviews(newReviews);
-    localStorage.setItem('math_reviews', JSON.stringify(newReviews));
+    const reviewsConfigRef = doc(db, 'settings', 'reviewsConfig');
+    await setDoc(reviewsConfigRef, { items: newReviews }, { merge: true });
   };
 
   const handleBookingSuccess = (newBooking: Booking) => {
-    const updated = [newBooking, ...activeBookings];
-    setActiveBookings(updated);
+    // This is handled by DemoBookingModal directly pushing to Firestore, 
+    // and onSnapshot will update activeBookings automatically.
+    // We just keep this for the local optimistic update if desired.
   };
 
   const handleScrollToSection = (sectionId: string) => {
@@ -163,7 +184,7 @@ export default function App() {
     }, 1000);
   };
 
-  const handleRequestCallback = (e: React.FormEvent) => {
+  const handleRequestCallback = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!callbackPhone.trim() || !callbackName.trim()) {
       alert('Please fill out your name and phone number.');
@@ -180,10 +201,10 @@ export default function App() {
       date: new Date().toLocaleDateString()
     };
 
-    const existingLogs = JSON.parse(localStorage.getItem('math_callbacks') || '[]');
-    existingLogs.push(callbackLog);
-    localStorage.setItem('math_callbacks', JSON.stringify(existingLogs));
-    setCallbacks(existingLogs);
+    const callbacksRef = collection(db, 'callbacks');
+    await addDoc(callbacksRef, callbackLog);
+
+    // Callbacks state is updated by onSnapshot listener
 
     setCallbackSuccess(true);
     setTimeout(() => {

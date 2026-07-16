@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { X, User, Phone, Mail, GraduationCap, Calendar as CalendarIcon, Clock, Check, ArrowRight, ArrowLeft, Globe } from 'lucide-react';
 import { Booking } from '../types';
 import { BOARDS_DATA } from '../data';
+import { db } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 interface DemoBookingModalProps {
   isOpen: boolean;
@@ -62,7 +64,7 @@ export default function DemoBookingModal({ isOpen, onClose, onBookingSuccess }: 
 
   const datesList = getNext7Days();
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     if (step === 1) {
       if (!parentName.trim() || !studentName.trim() || !grade || !contactNumber.trim() || !email.trim()) {
         alert('Please fill out all fields to continue.');
@@ -96,10 +98,13 @@ export default function DemoBookingModal({ isOpen, onClose, onBookingSuccess }: 
         socialId: socialId.trim()
       };
 
-      // Store in localStorage
-      const existing = JSON.parse(localStorage.getItem('math_bookings') || '[]');
-      existing.push(finalBooking);
-      localStorage.setItem('math_bookings', JSON.stringify(existing));
+      // Store in Firestore
+      try {
+        const bookingsRef = collection(db, 'bookings');
+        await addDoc(bookingsRef, finalBooking);
+      } catch (err) {
+        console.error('Error saving booking to Firestore', err);
+      }
 
       // Callback
       onBookingSuccess(finalBooking);

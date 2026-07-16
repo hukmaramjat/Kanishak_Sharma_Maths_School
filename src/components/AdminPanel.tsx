@@ -238,7 +238,7 @@ export default function AdminPanel({
               <span>Active State Notice</span>
             </div>
             <p className="font-sans text-[11px] text-gray-400 leading-normal">
-              Changes are instantly committed to <strong>localStorage</strong>. Refreshing the browser will preserve your customized configurations!
+              Changes are instantly committed to <strong>Firebase Firestore</strong>. Updates are synchronized globally in real-time!
             </p>
           </div>
         </div>
